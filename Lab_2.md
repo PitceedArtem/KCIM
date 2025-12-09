@@ -19,7 +19,7 @@ repeat initial-cloud-clusters [
 ```
 
 #### 2. Додати зміну кута падіння нових сонячних промінів протягом часу (це дозволить імітувати зміну положення сонця протягом доби).
-  Було модифіковано функцію create-sunshine для того щоб створювати проміні під різними кутаби для дослідження температури протягом доби.
+  Було модифіковано функцію create-sunshine для того щоб створювати проміні під різними кутами для дослідження температури протягом доби.
   В першу чергу було встановлено змінну довжини доби day-length у 10000 тіків симуляції, через інертність в зміні температури. 
 
 Далі було обрано параметри кутів 
@@ -114,7 +114,7 @@ end
 ```
 
 #### 3. Власниій варіант зміни - механізм динамічної зміни альбедо для дослідження явища "positive feedback loop" пов'язаного з температурою Землі та відбиваючою здатністю поверхні. 
-Було додано перемикач для встановлення параметру dynamic-albedo? що відповідає за активніст механізму зміни альбедо.
+Було додано перемикач для встановлення параметру dynamic-albedo? що відповідає за активність механізму зміни альбедо.
 У функціїї go було додано додаткову обробку стану manage-ice-feedback
 ```
 to go
@@ -139,42 +139,41 @@ end
 ```
 Функція manage-ice-feedback
 Для початку треба визначити параметри температур замерзання за плавлення льодяних шапок Землі. 
-- < 12 градусів: Льод на Землі починає замерзати (Високе Альбедо)
-- > 25 градусів: Льод на Землі починає танути (Низьке Альбедо)
+- меньше 20 градусів: Льод на Землі починає замерзати (Високе Альбедо)
+- більше 35 градусів: Льод на Землі починає стрімко танути (Низьке Альбедо)
 Встановлюємо параметри максимального та мінімального Альбедо.
 Виконуємо розрахунок target-albedo відносно температури поверхні Землі та встановлюємо оновлене значення
 ```
 to manage-ice-feedback
-  ;; Define the Temperature Thresholds
-  let frozen-temp 12
-  let melted-temp 25
-  
+  let frozen-temp 19
+  let melted-temp 34  ;; I also raised this to keep the transition smooth
+
   ;; Define Albedo Limits
-  let max-ice-albedo 0.85  ;; Bright white ice
-  let min-ocean-albedo 0.15 ;; Dark heat-absorbing water/land
-  
+  let max-ice-albedo 0.9   ;; Bright white ice
+  let min-ocean-albedo 0.10 ;; Dark heat-absorbing water/land
+
   let target-albedo 0
-  
+
   ;; Calculate Target Albedo based on current Temperature
-  ifelse temperature <= frozen-temp [ 
-    set target-albedo max-ice-albedo 
+  ifelse temperature <= frozen-temp [
+    set target-albedo max-ice-albedo
   ]
-  [ 
-    ifelse temperature >= melted-temp [ 
-      set target-albedo min-ocean-albedo 
+  [
+    ifelse temperature >= melted-temp [
+      set target-albedo min-ocean-albedo
     ]
     [
-      ;; Calculate position between frozen and melted (0.0 to 1.0)
+      ;; Calculate position between frozen and melted
       let ratio (temperature - frozen-temp) / (melted-temp - frozen-temp)
-      ;; Linear interpolation: As temp goes up, albedo goes down.
       set target-albedo max-ice-albedo - (ratio * (max-ice-albedo - min-ocean-albedo))
     ]
   ]
-  
+
+  ;; Apply Smoothing (Thermal Inertia)
   set albedo (0.99 * albedo) + (0.01 * target-albedo)
 end
 ```
-Додатково відображаемо зміну в альбедо кольором
+Додатково відображаемо зміну в альбедо кольором світло-синій - Лід, темно-голубий - Вода.
 ```
 to update-albedo
   ;; High Albedo (Ice) -> White/Light Blue
@@ -185,5 +184,5 @@ end
 
 ![Залежність середньої температури Землі від кількості хмар в атмосфері Землі](fig3.png)
 <br>
-Графік наочно показує гіпербалічну залежність середньої температури землі від кількості хмар в атмосфері, коли кількість хмар незначна, вони майже не впливають на температуру Землі, однак коли кількість хмар наближається до граничного значення в 45 одиниць, температура землі стабілізується на 20 градусах, кількість частинок тепла що потрапляють на поверню незначна, так само і як вірогідність випромінення теплової енергії з поверхні.
+Графік наочно показує
 
