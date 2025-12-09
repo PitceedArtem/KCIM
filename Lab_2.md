@@ -1,22 +1,22 @@
 ## Комп'ютерні системи імітаційного моделювання
 ## СПм-24-3, **Прошкін Артем Сергійович**
-### Лабораторна робота №**1**. Редагування імітаційних моделей у середовищі NetLogo
+### Лабораторна робота №**2**. Редагування імітаційних моделей у середовищі NetLogo
 
 <br>
 
-### Варіант 2, модель у середовищі NetLogo:
+# Варіант 2, модель у середовищі NetLogo:
 [Climate Change](https://www.netlogoweb.org/launch#http://www.netlogoweb.org/assets/modelslib/Sample%20Models/Earth%20Science/Climate%20Change.nlogo)
 
 <br>
 
-## Внесені зміни у вихідну логіку моделі, за варіантом:
+# Внесені зміни у вихідну логіку моделі, за варіантом:
 # 1. Додати можливість вказівки початкової кількості хмар.
 Було додано змінну що читає значення інпуту в інтерфейсі, при виконанні функції setup додає хмари відповідно до значення initial-cloud-clusters.
-\```
+```
 repeat initial-cloud-clusters [
   add-cloud
 ]
-\```
+```
 
 # 2. Додати зміну кута падіння нових сонячних промінів протягом часу (це дозволить імітувати зміну положення сонця протягом доби).
   Було модифіковано функцію create-sunshine для того щоб створювати проміні під різними кутаби для дослідження температури протягом доби.
@@ -29,7 +29,7 @@ repeat initial-cloud-clusters [
 
 Наступним чином було додано зсув для жерела променів з min-pxcor до max-pxcor відповідно до кута нахилу.
 
-\```
+```
 to create-sunshine
   ;; "day-progress" will go from 0.0 (sunrise) to 1.0 (sunset) repeatedly.
   let day-length 10000
@@ -56,9 +56,9 @@ to create-sunshine
     ]
   ]
 end
-\```
+```
 замість
-\```
+```
 to create-sunshine
   ;; don't necessarily create a ray each tick
   ;; as brightness gets higher make more
@@ -72,12 +72,11 @@ to create-sunshine
     ]
   ]
 end
-\```
+```
 
 Далі було змінено функцію обробки влучання лучів encounter-earth до поверхні Землі. 
 За допомогою розрахунку значення directness ми вирішуємо - поглинається промінь чи відбивається. При високих значеннях кутів вірогідності відбиття лучів будуть значно більшими. 
-
-\```
+```
 to encounter-earth
   ask rays with [ycor <= earth-top] [
     ;; Heading 180 is straight down (Vertical). cos(180) = -1. abs(-1) = 1.0.
@@ -98,9 +97,9 @@ to encounter-earth
       ]
   ]
 end
-\```
+```
 замість
-\```
+```
 to encounter-earth
   ask rays with [ycor <= earth-top] [
     ;; depending on the albedo either
@@ -112,12 +111,12 @@ to encounter-earth
         set breed heats ]
   ]
 end
-\```
+```
 
 # 3. Власниій варіант зміни - механізм динамічної зміни альбедо для дослідження явища "positive feedback loop" пов'язаного з температурою Землі та відбиваючою здатністю поверхні. 
 Було додано перемикач для встановлення параметру dynamic-albedo? що відповідає за активніст механізму зміни альбедо.
 У функціїї go було додано додаткову обробку стану manage-ice-feedback
-\```
+```
 to go
   ask clouds [ fd cloud-speed ]
   run-sunshine
@@ -137,14 +136,14 @@ to go
   
   tick
 end
-\```
+```
 Функція manage-ice-feedback
 Для початку треба визначити параметри температур замерзання за плавлення льодяних шапок Землі. 
 - < 12 градусів: Льод на Землі починає замерзати (Високе Альбедо)
 - > 25 градусів: Льод на Землі починає танути (Низьке Альбедо)
 Встановлюємо параметри максимального та мінімального Альбедо.
 Виконуємо розрахунок target-albedo відносно температури поверхні Землі та встановлюємо оновлене значення
-\```
+```
 to manage-ice-feedback
   ;; Define the Temperature Thresholds
   let frozen-temp 12
@@ -174,15 +173,15 @@ to manage-ice-feedback
   
   set albedo (0.99 * albedo) + (0.01 * target-albedo)
 end
-\```
+```
 Додатково відображаемо зміну в альбедо кольором
-\```
+```
 to update-albedo
   ;; High Albedo (Ice) -> White/Light Blue
   ;; Low Albedo (Water) -> Dark Blue
   set pcolor scale-color blue albedo -0.2 1.5
 end
-\```
+```
 
 ![Залежність середньої температури Землі від кількості хмар в атмосфері Землі](fig3.png)
 <br>
